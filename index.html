@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>متابعة التقديمات الوظيفية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F4EF; --surface:#FFFFFF; --ink:#221F1B; --muted:#847E70;
+  --line:#E4DFD3; --accent:#17493F; --accent-ink:#F6F4EF;
+  --amber:#8A6A16; --amber-bg:#F4EBD3;
+  --red:#8C3A34; --red-bg:#F5E4E1;
+  --green:#2E6B4F; --green-bg:#E2EFE7;
+  box-sizing:border-box;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --bg:#171512; --surface:#211F1B; --ink:#F1EEE6; --muted:#9C9689;
+    --line:#3A362E; --accent:#5FAE95; --accent-ink:#0F1512;
+    --amber:#D8B45C; --amber-bg:#332C1A;
+    --red:#E29088; --red-bg:#3A211E;
+    --green:#8FCBAA; --green-bg:#1C3428;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171512; --surface:#211F1B; --ink:#F1EEE6; --muted:#9C9689;
+  --line:#3A362E; --accent:#5FAE95; --accent-ink:#0F1512;
+  --amber:#D8B45C; --amber-bg:#332C1A;
+  --red:#E29088; --red-bg:#3A211E;
+  --green:#8FCBAA; --green-bg:#1C3428;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Tajawal', Tahoma, Arial, sans-serif;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-font-smoothing:antialiased;
+}
+header{
+  padding:22px 18px 14px; border-bottom:1px solid var(--line);
+  background:var(--surface);
+}
+h1{margin:0 0 2px; font-size:1.35rem; font-weight:900;}
+.sub{color:var(--muted); font-size:.88rem; margin:0;}
+nav{display:flex; gap:6px; padding:12px 18px 0; overflow-x:auto; background:var(--surface);}
+.tab{
+  flex:0 0 auto; padding:9px 16px; border-radius:10px 10px 0 0; cursor:pointer;
+  font-weight:700; font-size:.9rem; color:var(--muted); border:1px solid transparent;
+  border-bottom:none; white-space:nowrap;
+}
+.tab.active{ color:var(--accent); background:var(--bg); border-color:var(--line); }
+main{padding:16px 18px 40px; max-width:960px; margin:0 auto;}
+.toolbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;}
+.count{color:var(--muted); font-size:.85rem;}
+button{ font-family:inherit; }
+.btn{
+  background:var(--accent); color:var(--accent-ink); border:none; border-radius:9px;
+  padding:9px 16px; font-weight:700; font-size:.88rem; cursor:pointer;
+}
+.btn.secondary{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+.btn.small{ padding:5px 10px; font-size:.78rem; border-radius:7px; }
+.btn.danger{ background:transparent; color:var(--red); border:1px solid var(--line); }
+.table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+table{ width:100%; border-collapse:collapse; min-width:520px; }
+th,td{ text-align:start; padding:11px 12px; font-size:.86rem; border-bottom:1px solid var(--line); vertical-align:top; }
+th{ color:var(--muted); font-weight:700; font-size:.78rem; }
+tr:last-child td{ border-bottom:none; }
+tr.row{ cursor:pointer; }
+tr.row:hover{ background:var(--bg); }
+.actions{ white-space:nowrap; }
+.empty{ text-align:center; color:var(--muted); padding:40px 16px; font-size:.9rem; }
+.detail{ background:var(--bg); }
+.detail-inner{ padding:14px 16px; display:grid; gap:10px; }
+.field-row{ display:grid; grid-template-columns:150px 1fr; gap:10px; font-size:.85rem; }
+.field-row .k{ color:var(--muted); font-weight:700; }
+.field-row .v{ white-space:pre-wrap; }
+.field-row .v:empty::after{ content:"—"; color:var(--muted); }
+.followups{ display:grid; gap:8px; margin-top:4px; }
+.fu{ border-inline-start:2px solid var(--line); padding:2px 12px; }
+.fu .fk{ font-size:.78rem; color:var(--muted); font-weight:700; margin-bottom:2px; }
+.fu .fv{ font-size:.85rem; white-space:pre-wrap; }
+.fu .fv:empty::after{ content:"لا يوجد بعد"; color:var(--muted); }
+.link{ color:var(--accent); text-decoration:none; word-break:break-all; }
+.dot-green{ display:inline-block; width:12px; height:12px; border-radius:50%; background:#22C55E; box-shadow:0 0 0 2px rgba(34,197,94,.25); margin-inline-start:8px; vertical-align:middle; }
+.overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:flex-end;
+  justify-content:center; z-index:20; padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.overlay.hidden{ display:none; }
+.sheet{
+  background:var(--surface); width:100%; max-width:560px; max-height:85vh; overflow-y:auto;
+  border-radius:16px 16px 0 0; padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
+}
+@media (min-width:640px){
+  .overlay{ align-items:center; }
+  .sheet{ border-radius:16px; max-height:80vh; }
+}
+.sheet h2{ margin:0 0 14px; font-size:1.05rem; }
+.f-group{ margin-bottom:12px; }
+label{ display:block; font-size:.8rem; font-weight:700; color:var(--muted); margin-bottom:5px; }
+input,textarea{
+  width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:8px;
+  font-family:inherit; font-size:.9rem; background:var(--bg); color:var(--ink);
+}
+textarea{ min-height:56px; resize:vertical; }
+input:focus,textarea:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.sheet-actions{ display:flex; gap:8px; margin-top:16px; }
+.sheet-actions .btn{ flex:1; }
+.toast{
+  position:fixed; bottom:calc(18px + env(safe-area-inset-bottom,0px)); right:18px; left:18px;
+  max-width:340px; margin-inline-start:auto; background:var(--ink); color:var(--bg);
+  padding:10px 14px; border-radius:9px; font-size:.85rem; text-align:center;
+  opacity:0; transform:translateY(8px); transition:opacity .2s, transform .2s; pointer-events:none; z-index:30;
+}
+.toast.show{ opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script id="app-data" type="application/json">{"companies": [{"id": "muh4qozh93jl1", "name": "أرامكو", "sector": "النفط والغاز", "phone": "", "mobile": "", "hq": "المنطقة الشرقية", "email": "", "website": "https://www.aramco.com", "contact": ""}, {"id": "1a0e035e9d6244ce19", "name": "سابك", "sector": "البتروكيماويات والكيماويات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.sabic.com", "contact": ""}, {"id": "1a0e035e9d6308623f", "name": "الهيئة الملكية", "sector": "التنمية الصناعية (تطوير وإدارة المدن الصناعية)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://careers.rcjy.gov.sa/", "contact": ""}, {"id": "1a0e035e9d62c38ef1", "name": "وزارة الطاقة", "sector": "جهة حكومية - قطاع الطاقة", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.moenergy.gov.sa", "contact": ""}, {"id": "1a0e035e9d62fbca44", "name": "ساتورب", "sector": "تكرير النفط والبتروكيماويات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.satorp.com", "contact": ""}, {"id": "1a0e035e9d628c8efa", "name": "المتقدمة", "sector": "البتروكيماويات (بولي بروبلين ومشتقاته)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://advancedpetrochem.com/ar/التوظيف/", "contact": ""}, {"id": "1a0e035e9d611a2127", "name": "سبكيم", "sector": "البتروكيماويات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.sipchem.com", "contact": ""}, {"id": "1a0e035e9d62a912b2", "name": "شيفرون", "sector": "النفط والغاز والبتروكيماويات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.chevron.com", "contact": ""}, {"id": "1a0e035e9d624a370e", "name": "ساسرف", "sector": "تكرير النفط", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://sasref.com.sa/ar/careers.html", "contact": ""}, {"id": "1a0e035e9d62ec6b64", "name": "صدارة", "sector": "البتروكيماويات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.sadara.com", "contact": ""}, {"id": "1a0e035e9d61fdb9b7", "name": "تمرس", "sector": "خدمات صناعية (تأجير معدات، صيانة مصانع، قوى عاملة)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://expertindus.com/", "contact": ""}, {"id": "1a0e035e9d62376efc", "name": "تصنيع", "sector": "البتروكيماويات والصناعات الأساسية", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.tasnee.com", "contact": ""}, {"id": "1a0e035e9d621dddc", "name": "معادن", "sector": "التعدين (ألومنيوم وفوسفات وذهب)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.maaden.com.sa", "contact": ""}, {"id": "1a0eebe118d21a7c44", "name": "اير برودكتس", "sector": "الغازات الصناعية", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.airproducts.com", "contact": ""}, {"id": "1a0eebe118d2e3242c", "name": "كيمانول", "sector": "الكيماويات المتخصصة", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.chemanol.com", "contact": ""}, {"id": "1a0eebe118d28e2257", "name": "الفارابي", "sector": "البتروكيماويات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.farabipc.com", "contact": ""}, {"id": "1a0eebe118d101cedf", "name": "سولفاي السعودية", "sector": "الكيماويات المتخصصة", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.solvay.com", "contact": ""}, {"id": "1a0eebe118d390662a", "name": "مرافق", "sector": "المرافق الصناعية (كهرباء ومياه وبخار)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.marafiq.com.sa", "contact": ""}, {"id": "1a0eebe118d206208a", "name": "تحلية المياه (SWCC)", "sector": "تحلية المياه والمرافق", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.swcc.gov.sa", "contact": ""}, {"id": "1a0eebe118d9d4e1c", "name": "Schlumberger", "sector": "خدمات حقول النفط", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.slb.com", "contact": ""}, {"id": "1a0eebe118edd42c9", "name": "Halliburton", "sector": "خدمات حقول النفط", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.halliburton.com", "contact": ""}, {"id": "1a0eebe118e172c4c1", "name": "Baker Hughes", "sector": "خدمات حقول النفط", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.bakerhughes.com", "contact": ""}, {"id": "1a0eebe118e2067f8d", "name": "JACOBS", "sector": "الهندسة والمقاولات (EPC)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.jacobs.com", "contact": ""}, {"id": "1a0eebe118e98ee08", "name": "TECNICAS REUNIDAS", "sector": "الهندسة والمقاولات (EPC)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.tecnicasreunidas.es", "contact": ""}, {"id": "1a0eebe118e24fe095", "name": "SAIPEM", "sector": "الهندسة والمقاولات (EPC)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.saipem.com", "contact": ""}, {"id": "1a0eebe118e2438e51", "name": "JGC", "sector": "الهندسة والمقاولات (EPC)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.jgc.com", "contact": ""}, {"id": "1a0eebe118e9692dd", "name": "DAELIM", "sector": "الهندسة والمقاولات (EPC)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.daelim.co.kr", "contact": ""}, {"id": "1a0eebe118e26857ac", "name": "TEKFEN", "sector": "الهندسة والمقاولات (EPC)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.tekfen.com.tr", "contact": ""}, {"id": "1a0f4891ecd1bba8ab", "name": "SGS Saudi Arabia", "sector": "الفحص والمعاينة والتفتيش واعتماد الجودة", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.sgs.com/en-sa", "contact": ""}, {"id": "1a0f4891ecd24fd2a2", "name": "AL Hoty", "sector": "مختبرات الفحص البيئي والصناعي", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.al-hoty.com", "contact": ""}, {"id": "1a0f4891ecd3842e90", "name": "ICMS", "sector": "مقاولات وخدمات هندسية صناعية", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.icms.com.sa", "contact": ""}, {"id": "1a0f4891ecd1b3b922", "name": "ROTARY", "sector": "مقاولات EPC - خزانات التخزين (نفط وغاز)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.rotaryeng.com.sg", "contact": ""}, {"id": "1a0f4891ecd208a3de", "name": "AYTB", "sector": "مقاولات صناعية وخدمات دعم (نفط وغاز وبتروكيماويات)", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.aytb.com", "contact": ""}, {"id": "1a0f4891ecd77cef7", "name": "AL Falak", "sector": "تقنية المعلومات والاتصالات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.alfalak.com", "contact": ""}, {"id": "1a0f4891ecd1ca406b", "name": "SANAD", "sector": "حفر آبار نفط برية", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.sanad.com", "contact": ""}, {"id": "1a0f4891ecd2d4572f", "name": "ROWAN", "sector": "حفر آبار نفط بحرية", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.arodrilling.com", "contact": ""}, {"id": "1a0f4891ecdfbd5e6", "name": "SRACO", "sector": "مقاولات وإدارة مرافق واستشارات وتقنية معلومات", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.sraco.com.sa", "contact": ""}, {"id": "1a0f4891ecd5d109", "name": "GAL", "sector": "", "phone": "", "mobile": "", "hq": "", "email": "", "website": "https://www.gal.com.sa", "contact": ""}], "applications": [], "jobsites": []}</script>
+<script id="app-logic">
+const SECTIONS = {
+  companies: {
+    title:'الشركات المستهدفة', singular:'شركة', addLabel:'إضافة شركة', emptyText:'لا توجد شركات مضافة بعد',
+    columns:[['name','اسم الشركة'],['sector','القطاع'],['mobile','هاتف نقال']],
+    quickAction:{ label:'إضافة تقديم', targetSection:'applications', mapFields: item => ({ company: item.name }) },
+    fields:[
+      {key:'name', label:'اسم الشركة', required:true},
+      {key:'sector', label:'القطاع'},
+      {key:'phone', label:'رقم الهاتف'},
+      {key:'mobile', label:'هاتف نقال'},
+      {key:'hq', label:'مقر الشركة'},
+      {key:'email', label:'البريد الإلكتروني'},
+      {key:'website', label:'الموقع الإلكتروني', type:'url'},
+      {key:'contact', label:'اسم الشخص المسؤول'},
+    ]
+  },
+  applications: {
+    title:'التقديمات والمتابعة', singular:'تقديم', addLabel:'إضافة تقديم', emptyText:'لا توجد تقديمات مضافة بعد',
+    columns:[['company','اسم الشركة'],['method','طريقة التقديم'],['date','تاريخ التقديم']],
+    fields:[
+      {key:'company', label:'اسم الشركة', required:true},
+      {key:'method', label:'طريقة التقديم'},
+      {key:'date', label:'تاريخ التقديم', type:'date'},
+      {key:'username', label:'اسم المستخدم'},
+      {key:'code', label:'الرقم السري'},
+      {key:'notes', label:'ملاحظات', type:'textarea'},
+      {key:'f1', label:'نتيجة المتابعة الأولى', type:'textarea'},
+      {key:'f2', label:'نتيجة المتابعة الثانية', type:'textarea'},
+      {key:'f3', label:'نتيجة المتابعة الثالثة', type:'textarea'},
+      {key:'f4', label:'نتيجة المتابعة الرابعة', type:'textarea'},
+      {key:'f5', label:'نتيجة المتابعة الخامسة', type:'textarea'},
+    ]
+  },
+  jobsites: {
+    title:'مواقع التوظيف', singular:'موقع', addLabel:'إضافة موقع', emptyText:'لا توجد مواقع مضافة بعد',
+    columns:[['name','اسم الموقع'],['url','الرابط']],
+    fields:[
+      {key:'name', label:'اسم الموقع', required:true},
+      {key:'url', label:'الرابط', type:'url'},
+    ]
+  }
+};
+const TABS = ['companies','applications','jobsites'];
+
+let state = JSON.parse(document.getElementById('app-data').textContent);
+let activeTab = 'companies';
+let expandedId = null;
+let pendingDelete = null;
+let editingSection = null, editingId = null;
+let artifactAPI = null;
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return (s ?? '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function buildDoc(st){
+  const dataScript = `<script id="app-data" type="application/json">${JSON.stringify(st)}<\/script>`;
+  const logicScript = document.getElementById('app-logic').outerHTML;
+  return `<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n${document.head.outerHTML}\n<body>\n<div id="app"></div>\n${dataScript}\n${logicScript}\n</body>\n</html>`;
+}
+
+let toastTimer;
+function toast(msg){
+  let t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+async function persist(){
+  if(artifactAPI){
+    try{
+      await artifactAPI.publish(buildDoc(state));
+    }catch(e){
+      if(e && e.code === 'conflict'){ location.reload(); return; }
+      try{ localStorage.setItem('jobtracker_state', JSON.stringify(state)); }catch(_){}
+    }
+  } else {
+    try{ localStorage.setItem('jobtracker_state', JSON.stringify(state)); }catch(_){}
+  }
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <header>
+      <h1>متابعة التقديمات الوظيفية</h1>
+      <p class="sub">تتبّع الشركات المستهدفة، تقديماتك، ومواقع التوظيف في مكان واحد</p>
+    </header>
+    <nav>${TABS.map(t=>`<div class="tab ${t===activeTab?'active':''}" data-tab="${t}">${SECTIONS[t].title}</div>`).join('')}</nav>
+    <main>${renderSection(activeTab)}</main>
+    <div class="overlay hidden" id="overlay"><div class="sheet" id="sheet"></div></div>
+  `;
+  app.querySelectorAll('.tab').forEach(el=>el.addEventListener('click', ()=>{ activeTab = el.dataset.tab; expandedId=null; pendingDelete=null; render(); }));
+  app.querySelector('#add-btn')?.addEventListener('click', ()=> openForm(activeTab, null));
+  app.querySelectorAll('tr.row').forEach(el=>el.addEventListener('click', (e)=>{
+    if(e.target.closest('button')) return;
+    const id = el.dataset.id;
+    expandedId = expandedId === id ? null : id;
+    render();
+  }));
+  app.querySelectorAll('[data-edit]').forEach(el=>el.addEventListener('click', (e)=>{ e.stopPropagation(); openForm(activeTab, el.dataset.edit); }));
+  app.querySelectorAll('[data-quick]').forEach(el=>el.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const item = state[activeTab].find(x=>x.id===el.dataset.quick);
+    const qa = SECTIONS[activeTab].quickAction;
+    openForm(qa.targetSection, null, qa.mapFields(item));
+  }));
+  app.querySelectorAll('[data-del]').forEach(el=>el.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const id = el.dataset.del;
+    if(pendingDelete === id){
+      pendingDelete = null;
+      removeItem(activeTab, id);
+    } else {
+      pendingDelete = id;
+      render();
+      setTimeout(()=>{ if(pendingDelete === id){ pendingDelete = null; render(); } }, 4000);
+    }
+  }));
+}
+
+function renderSection(sec){
+  const def = SECTIONS[sec];
+  const items = state[sec];
+  if(items.length === 0){
+    return `
+      <div class="toolbar"><span class="count">0 ${def.singular}</span><button class="btn" id="add-btn">${def.addLabel}</button></div>
+      <div class="table-wrap"><div class="empty">${def.emptyText}</div></div>
+    `;
+  }
+  const rows = items.map(item => {
+    const cells = def.columns.map(([k,_]) => {
+      if(k==='url' && item[k]) return `<td><a class="link" href="${esc(item[k])}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(item[k])}</a></td>`;
+      if(sec==='companies' && k==='name'){
+        const name = (item.name || '').trim();
+        const hasApp = name !== '' && state.applications.some(a => (a.company || '').trim() === name);
+        return `<td>${esc(item[k])}${hasApp ? '<span class="dot-green" title="تم إضافة تقديم لهذه الشركة"></span>' : ''}</td>`;
+      }
+      return `<td>${esc(item[k])}</td>`;
+    }).join('');
+    const isOpen = expandedId === item.id;
+    const detail = isOpen ? renderDetail(sec, item) : '';
+    const quickBtn = def.quickAction ? `<button class="btn small" data-quick="${item.id}">${def.quickAction.label}</button> ` : '';
+    const isConfirming = pendingDelete === item.id;
+    const delBtn = isConfirming
+      ? `<button class="btn small" style="background:var(--red); color:var(--accent-ink); border:none;" data-del="${item.id}">تأكيد الحذف</button>`
+      : `<button class="btn small danger" data-del="${item.id}">حذف</button>`;
+    return `<tr class="row" data-id="${item.id}">${cells}<td class="actions">${quickBtn}<button class="btn small secondary" data-edit="${item.id}">تعديل</button> ${delBtn}</td></tr>${detail}`;
+  }).join('');
+  return `
+    <div class="toolbar"><span class="count">${items.length} ${def.singular}</span><button class="btn" id="add-btn">${def.addLabel}</button></div>
+    <div class="table-wrap"><table>
+      <thead><tr>${def.columns.map(([_,l])=>`<th>${l}</th>`).join('')}<th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  `;
+}
+
+function renderDetail(sec, item){
+  const def = SECTIONS[sec];
+  const shown = new Set(def.columns.map(c=>c[0]));
+  const rest = def.fields.filter(f => !shown.has(f.key) && !/^f[1-5]$/.test(f.key));
+  const followups = def.fields.filter(f => /^f[1-5]$/.test(f.key));
+  const labels = ['المتابعة الأولى','المتابعة الثانية','المتابعة الثالثة','المتابعة الرابعة','المتابعة الخامسة'];
+  let html = `<tr class="detail"><td colspan="${def.columns.length+1}"><div class="detail-inner">`;
+  rest.forEach(f=>{
+    const val = f.key==='website'||f.key==='url'
+      ? (item[f.key] ? `<a class="link" href="${esc(item[f.key])}" target="_blank" rel="noopener">${esc(item[f.key])}</a>` : '')
+      : esc(item[f.key]);
+    html += `<div class="field-row"><div class="k">${f.label}</div><div class="v">${val}</div></div>`;
+  });
+  if(followups.length){
+    html += `<div class="followups">`;
+    followups.forEach((f,i)=>{
+      html += `<div class="fu"><div class="fk">${labels[i]}</div><div class="fv">${esc(item[f.key])}</div></div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div></td></tr>`;
+  return html;
+}
+
+function openForm(sec, id, prefill){
+  editingSection = sec; editingId = id;
+  const def = SECTIONS[sec];
+  const item = id ? state[sec].find(x=>x.id===id) : (prefill || {});
+  const overlay = document.getElementById('overlay');
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <h2>${id ? 'تعديل' : def.addLabel}</h2>
+    <form id="item-form">
+      ${def.fields.map(f=>`
+        <div class="f-group">
+          <label for="f-${f.key}">${f.label}${f.required?' *':''}</label>
+          ${f.type==='textarea'
+            ? `<textarea id="f-${f.key}" name="${f.key}">${esc(item[f.key])}</textarea>`
+            : `<input id="f-${f.key}" name="${f.key}" type="${f.type==='date'?'date':(f.type==='url'?'url':'text')}" value="${esc(item[f.key])}" ${f.required?'required':''}>`}
+        </div>
+      `).join('')}
+      <div class="sheet-actions">
+        <button type="button" class="btn secondary" id="cancel-btn">إلغاء</button>
+        <button type="submit" class="btn">حفظ</button>
+      </div>
+    </form>
+  `;
+  overlay.classList.remove('hidden');
+  document.getElementById('cancel-btn').addEventListener('click', closeForm);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeForm(); });
+  document.getElementById('item-form').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const rec = id ? {...item} : {id: uid()};
+    def.fields.forEach(f => rec[f.key] = (fd.get(f.key) || '').toString().trim());
+    if(id){
+      const idx = state[sec].findIndex(x=>x.id===id);
+      state[sec][idx] = rec;
+    } else {
+      state[sec].push(rec);
+    }
+    activeTab = sec;
+    expandedId = null;
+    closeForm();
+    render();
+    persist();
+    toast('تم الحفظ');
+  });
+}
+
+function closeForm(){
+  document.getElementById('overlay').classList.add('hidden');
+  editingSection = null; editingId = null;
+}
+
+function removeItem(sec, id){
+  state[sec] = state[sec].filter(x=>x.id!==id);
+  if(expandedId===id) expandedId=null;
+  render();
+  persist();
+  toast('تم الحذف');
+}
+
+async function boot(){
+  try{ artifactAPI = await claude.use('artifact'); }catch(e){ artifactAPI = null; }
+  if(!artifactAPI){
+    try{ const ls = localStorage.getItem('jobtracker_state'); if(ls) state = JSON.parse(ls); }catch(_){}
+    render();
+  }
+}
+
+render();
+boot();
+</script>
+</body>
+</html>
