@@ -51,9 +51,17 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 header{
+  position:relative;
   padding:22px 18px 14px; border-bottom:1px solid var(--line);
   background:var(--surface);
 }
+.icon-btn{
+  position:absolute; top:12px; left:12px; width:24px; height:24px;
+  display:flex; align-items:center; justify-content:center;
+  background:transparent; border:none; border-radius:6px;
+  color:var(--muted); opacity:.35; font-size:13px; line-height:1; cursor:pointer; padding:0;
+}
+.icon-btn:hover, .icon-btn:focus{ opacity:.9; background:var(--bg); }
 h1{margin:0 0 2px; font-size:1.35rem; font-weight:900;}
 .sub{color:var(--muted); font-size:.88rem; margin:0;}
 nav{display:flex; gap:6px; padding:12px 18px 0; overflow-x:auto; background:var(--surface);}
@@ -127,6 +135,8 @@ input:focus,textarea:focus{ outline:2px solid var(--accent); outline-offset:1px;
   opacity:0; transform:translateY(8px); transition:opacity .2s, transform .2s; pointer-events:none; z-index:30;
 }
 .toast.show{ opacity:1; transform:translateY(0); }
+.footer-export{ text-align:center; padding:10px 0 28px; }
+.footer-export .icon-btn{ position:static; width:auto; height:auto; padding:6px 10px; }
 </style>
 </head>
 <body>
@@ -221,10 +231,10 @@ function render(){
     <header>
       <h1>متابعة التقديمات الوظيفية</h1>
       <p class="sub">تتبّع الشركات المستهدفة، تقديماتك، ومواقع التوظيف في مكان واحد</p>
-      <button class="btn small secondary" id="export-btn" style="margin-top:10px;">تصدير البيانات</button>
     </header>
     <nav>${TABS.map(t=>`<div class="tab ${t===activeTab?'active':''}" data-tab="${t}">${SECTIONS[t].title}</div>`).join('')}</nav>
     <main>${renderSection(activeTab)}</main>
+    <div class="footer-export"><button class="icon-btn" id="export-btn" title="تصدير البيانات" aria-label="تصدير البيانات">⬇</button></div>
     <div class="overlay hidden" id="overlay"><div class="sheet" id="sheet"></div></div>
   `;
   document.getElementById('export-btn')?.addEventListener('click', openExport);
