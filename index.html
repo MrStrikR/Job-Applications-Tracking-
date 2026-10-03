@@ -221,11 +221,13 @@ function render(){
     <header>
       <h1>متابعة التقديمات الوظيفية</h1>
       <p class="sub">تتبّع الشركات المستهدفة، تقديماتك، ومواقع التوظيف في مكان واحد</p>
+      <button class="btn small secondary" id="export-btn" style="margin-top:10px;">تصدير البيانات</button>
     </header>
     <nav>${TABS.map(t=>`<div class="tab ${t===activeTab?'active':''}" data-tab="${t}">${SECTIONS[t].title}</div>`).join('')}</nav>
     <main>${renderSection(activeTab)}</main>
     <div class="overlay hidden" id="overlay"><div class="sheet" id="sheet"></div></div>
   `;
+  document.getElementById('export-btn')?.addEventListener('click', openExport);
   app.querySelectorAll('.tab').forEach(el=>el.addEventListener('click', ()=>{ activeTab = el.dataset.tab; expandedId=null; pendingDelete=null; render(); }));
   app.querySelector('#add-btn')?.addEventListener('click', ()=> openForm(activeTab, null));
   app.querySelectorAll('tr.row').forEach(el=>el.addEventListener('click', (e)=>{
@@ -359,6 +361,37 @@ function openForm(sec, id, prefill){
     render();
     persist();
     toast('تم الحفظ');
+  });
+}
+
+function openExport(){
+  const overlay = document.getElementById('overlay');
+  const sheet = document.getElementById('sheet');
+  const json = JSON.stringify(state, null, 2);
+  sheet.innerHTML = `
+    <h2>تصدير البيانات</h2>
+    <p style="font-size:.85rem; color:var(--muted); margin-top:0;">انسخ النص بالأسفل وأرسله لمن يساعدك بدمج البيانات.</p>
+    <textarea id="export-text" readonly style="min-height:260px; font-family:monospace; font-size:.75rem; direction:ltr; text-align:left;">${esc(json)}</textarea>
+    <div class="sheet-actions">
+      <button type="button" class="btn secondary" id="export-close-btn">إغلاق</button>
+      <button type="button" class="btn" id="export-copy-btn">نسخ</button>
+    </div>
+  `;
+  overlay.classList.remove('hidden');
+  document.getElementById('export-close-btn').addEventListener('click', closeForm);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeForm(); });
+  document.getElementById('export-copy-btn').addEventListener('click', async ()=>{
+    const ta = document.getElementById('export-text');
+    try{
+      await navigator.clipboard.writeText(json);
+      toast('تم النسخ');
+    }catch(_){
+      ta.removeAttribute('readonly');
+      ta.focus(); ta.select();
+      try{ document.execCommand('copy'); toast('تم النسخ'); }
+      catch(_){ toast('انسخ النص يدويًا'); }
+      ta.setAttribute('readonly','');
+    }
   });
 }
 
